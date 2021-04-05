@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Caching.Memory;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Battleships.Models;
+using Microsoft.Extensions.Options;
+using Battleships.Configuration;
+using Battleships.Models.Api;
+using Battleships.Errors;
 
 namespace Battleships.Controllers
 {
@@ -16,7 +15,16 @@ namespace Battleships.Controllers
     public class BattleShipController : ControllerBase
     {
 
-        private IMemoryCache _cache;
+        private readonly IMemoryCache _cache;
+        private readonly ILogger<BattleShipController> _logger;
+        private readonly IOptions<BattleshipConfiguration> _config;
+
+        public BattleShipController(ILogger<BattleShipController> logger, IMemoryCache memoryCache, IOptions<BattleshipConfiguration> config)
+        {
+            _cache = memoryCache;
+            _logger = logger;
+            _config = config;
+        }
 
 
         [Route("/error")]
@@ -24,7 +32,7 @@ namespace Battleships.Controllers
 
         [HttpGet]
         [Route("NewGame")]
-        public ActionResult<GameState> GetNewGame()
+        public ActionResult<GameStateResponse> GetNewGame()
         {
             var rng = new Random();
             int random = rng.Next(1, 10000);
@@ -32,11 +40,11 @@ namespace Battleships.Controllers
                 random = rng.Next(1, 10000);
             }
 
-            GameState game;
+            GameStateResponse game;
 
             using (var entry = _cache.CreateEntry(random))
             {
-                game = new GameState(random);
+                game = new GameStateResponse(random);
                 entry.Value = game;
                 entry.AbsoluteExpiration = DateTime.UtcNow.AddDays(10);
             }
@@ -46,22 +54,19 @@ namespace Battleships.Controllers
 
         [HttpPost]
         [Route("Shot")]
-        public ActionResult<GameState> Shoot(ShootRequest request)
+        public ActionResult<GameStateResponse> Shot(ShotRequest request)
         {
-            _cache.TryGetValue(request.GameId, out GameState game);
+            _cache.TryGetValue(request.GameId, out GameStateResponse game);
             if (game == null)
-                throw new Exception("Invalid GameId");
+                throw new InvalidGameIdException(request.GameId);
 
             if (game.GameStatus != GameStatuses.SHOOTING)
-                throw new Exception("Game is not in the Shooting mode, current mode: " + game.GameStatus);
+                throw new InvalidGameStatusShootingException(game.GameStatus);
 
             if (game.NextPlayer != request.PlayerId)
-                throw new Exception("Not your turn! Wait for player " + game.NextPlayer + " to shot next");
+                throw new InvalidTurnPlayerException(game.NextPlayer);
 
-            string validationResult = request.validateShot();
-            if (validationResult != "")
-                throw new Exception(validationResult);
-
+            request.validateShot(_config.Value.MatrixWidth, _config.Value.MatrixHeight);
             game.performShot(request.Coordinate);
             _cache.Set(game.GameId, game);
             return game;
@@ -70,37 +75,24 @@ namespace Battleships.Controllers
 
         [HttpPost]
         [Route("PlaceShips")]
-        public ActionResult<GameState> PlaceShips(ShipPlacementRequest request)
+        public ActionResult<GameStateResponse> PlaceShips(ShipPlacementRequest request)
         {
-            _cache.TryGetValue(request.GameId, out GameState game);
+            _cache.TryGetValue(request.GameId, out GameStateResponse game);
             if(game == null)
-                throw new Exception("Invalid GameId");
-            
-            if(game.GameStatus != GameStatuses.PLACING)
-                throw new Exception("Game already started");
+                throw new InvalidGameIdException(request.GameId);
+
+            if (game.GameStatus != GameStatuses.PLACING)
+                throw new InvalidGameStatusPlacingException(game.GameStatus);
             
             if(request.PlayerId != 1 && request.PlayerId != 2)
-                throw new Exception("Only players with Id 1 and 2 are permitted");
+                throw new InvalidPlayerIdException();
 
-            string validationResult = request.validateShipPlacement();
-            if(validationResult != "")
-                throw new Exception(validationResult);
-
+            request.validateShipPlacement(_config.Value.MatrixWidth, _config.Value.MatrixHeight, _config.Value.Ships);
+            
             game.performPlacement(request.PlayerId, request.Ships);
 
-            
             _cache.Set(game.GameId, game);
             return game;
-        }
-
-
-
-        private readonly ILogger<BattleShipController> _logger;
-
-        public BattleShipController(ILogger<BattleShipController> logger, IMemoryCache memoryCache)
-        {
-            _cache = memoryCache;
-            _logger = logger;
         }
 
     }

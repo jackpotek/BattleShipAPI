@@ -1,13 +1,15 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using System.Threading.Tasks;
 
 namespace Battleships
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            IHost webHost = CreateHostBuilder(args).Build();
+            await webHost.RunAsync();
 
         }
 
@@ -15,7 +17,8 @@ namespace Battleships
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>()
+                    .UseSetting(WebHostDefaults.SuppressStatusMessagesKey, "True");
                 });
     }
 }

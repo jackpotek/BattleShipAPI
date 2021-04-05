@@ -5,9 +5,9 @@ using System.Security.Cryptography.Xml;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Battleships.Models
+namespace Battleships.Models.Api
 {
-    public class GameState
+    public class GameStateResponse
     {
         public int GameId { get; set; }
         public String GameStatus { get; set; }
@@ -19,7 +19,7 @@ namespace Battleships.Models
         public int WinnerPlayer { get; set; }
         public string Message { get; set; }
 
-        public GameState(int gameId)
+        public GameStateResponse(int gameId)
         {
             GameId = gameId;
             GameStatus = GameStatuses.PLACING;

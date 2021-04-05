@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Battleships.Models
+namespace Battleships.Models.Api
 {
     public class Coordinate
     {

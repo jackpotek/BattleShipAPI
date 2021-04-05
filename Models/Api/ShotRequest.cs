@@ -9,11 +9,5 @@ namespace Battleships.Models.Api
 
         public Coordinate Coordinate { get; set; }
 
-        public void validateShot(int width, int height)
-        {
-            if (Coordinate.Row < 1 || Coordinate.Row > height || Coordinate.Column < 1 || Coordinate.Column > width)
-                throw new InvalidCoordinatesException(width, height);
-        }
-
     }
 }

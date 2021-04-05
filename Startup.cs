@@ -1,4 +1,5 @@
 using Battleships.Configuration;
+using Battleships.Engine;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -33,6 +34,7 @@ namespace Battleships
                 });
             });
             services.Configure<BattleshipConfiguration>(Configuration.GetSection("BattleshipConfiguration"));
+            services.AddSingleton<GameEngine>();
 
         }
 

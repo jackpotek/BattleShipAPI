@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Battleships.Configuration;
 using Battleships.Models.Api;
 using Battleships.Errors;
+using Battleships.Engine;
 
 namespace Battleships.Controllers
 {
@@ -18,12 +19,14 @@ namespace Battleships.Controllers
         private readonly IMemoryCache _cache;
         private readonly ILogger<BattleShipController> _logger;
         private readonly IOptions<BattleshipConfiguration> _config;
+        private readonly GameEngine _engine;
 
-        public BattleShipController(ILogger<BattleShipController> logger, IMemoryCache memoryCache, IOptions<BattleshipConfiguration> config)
+        public BattleShipController(ILogger<BattleShipController> logger, IMemoryCache memoryCache, IOptions<BattleshipConfiguration> config, GameEngine engine)
         {
             _cache = memoryCache;
             _logger = logger;
             _config = config;
+            _engine = engine;
         }
 
 
@@ -57,20 +60,9 @@ namespace Battleships.Controllers
         public ActionResult<GameStateResponse> Shot(ShotRequest request)
         {
             _cache.TryGetValue(request.GameId, out GameStateResponse game);
-            if (game == null)
-                throw new InvalidGameIdException(request.GameId);
-
-            if (game.GameStatus != GameStatuses.SHOOTING)
-                throw new InvalidGameStatusShootingException(game.GameStatus);
-
-            if (game.NextPlayer != request.PlayerId)
-                throw new InvalidTurnPlayerException(game.NextPlayer);
-
-            request.validateShot(_config.Value.MatrixWidth, _config.Value.MatrixHeight);
-            game.performShot(request.Coordinate);
+            _engine.Shot(request, game);
             _cache.Set(game.GameId, game);
             return game;
-
         }
 
         [HttpPost]
@@ -78,19 +70,7 @@ namespace Battleships.Controllers
         public ActionResult<GameStateResponse> PlaceShips(ShipPlacementRequest request)
         {
             _cache.TryGetValue(request.GameId, out GameStateResponse game);
-            if(game == null)
-                throw new InvalidGameIdException(request.GameId);
-
-            if (game.GameStatus != GameStatuses.PLACING)
-                throw new InvalidGameStatusPlacingException(game.GameStatus);
-            
-            if(request.PlayerId != 1 && request.PlayerId != 2)
-                throw new InvalidPlayerIdException();
-
-            request.validateShipPlacement(_config.Value.MatrixWidth, _config.Value.MatrixHeight, _config.Value.Ships);
-            
-            game.performPlacement(request.PlayerId, request.Ships);
-
+            _engine.PlaceShips(request, game);
             _cache.Set(game.GameId, game);
             return game;
         }

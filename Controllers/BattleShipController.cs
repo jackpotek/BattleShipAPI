@@ -1,13 +1,11 @@
-﻿using System;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Caching.Memory;
-using Battleships.Models;
-using Microsoft.Extensions.Options;
-using Battleships.Configuration;
-using Battleships.Models.Api;
-using Battleships.Errors;
+﻿using Battleships.Configuration;
 using Battleships.Engine;
+using Battleships.Models.Api;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System;
 
 namespace Battleships.Controllers
 {
@@ -39,7 +37,8 @@ namespace Battleships.Controllers
         {
             var rng = new Random();
             int random = rng.Next(1, 10000);
-            while (_cache.Get(random) != null){
+            while (_cache.Get(random) != null)
+            {
                 random = rng.Next(1, 10000);
             }
 

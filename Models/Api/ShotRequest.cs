@@ -1,6 +1,4 @@
-﻿using Battleships.Errors;
-
-namespace Battleships.Models.Api
+﻿namespace Battleships.Models.Api
 {
     public class ShotRequest
     {

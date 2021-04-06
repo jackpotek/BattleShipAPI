@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Battleships.Models.Api
+﻿namespace Battleships.Models.Api
 {
     public class Coordinate
     {

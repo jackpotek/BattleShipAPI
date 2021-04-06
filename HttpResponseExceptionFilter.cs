@@ -1,9 +1,8 @@
-﻿using System;
-using Battleships.Errors;
+﻿using Battleships.Errors;
 using Battleships.Models.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Logging;
+using System;
 
 namespace Battleships
 {

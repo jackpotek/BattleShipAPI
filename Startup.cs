@@ -25,7 +25,8 @@ namespace Battleships
             services.AddControllers(options => options.Filters.Add(new HttpResponseExceptionFilter()))
                 .AddJsonOptions(options => { options.JsonSerializerOptions.IgnoreNullValues = true; });
             services.AddMemoryCache();
-            services.AddCors(o => {
+            services.AddCors(o =>
+            {
                 o.AddPolicy("Cors", builder =>
                 {
                     builder.AllowAnyOrigin()
@@ -35,6 +36,8 @@ namespace Battleships
             });
             services.Configure<BattleshipConfiguration>(Configuration.GetSection("BattleshipConfiguration"));
             services.AddSingleton<GameEngine>();
+
+            services.AddSwaggerDocument();
 
         }
 
@@ -46,12 +49,12 @@ namespace Battleships
 
             app.UseRouting();
 
-            app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+            app.UseOpenApi();
+            app.UseSwaggerUi3();
         }
     }
 }

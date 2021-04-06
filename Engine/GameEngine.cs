@@ -4,10 +4,8 @@ using Battleships.Models;
 using Battleships.Models.Api;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Battleships.Engine
 {

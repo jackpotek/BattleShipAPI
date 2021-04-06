@@ -1,8 +1,4 @@
-﻿using Battleships.Configuration;
-using Battleships.Errors;
-using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
 namespace Battleships.Models.Api
 {

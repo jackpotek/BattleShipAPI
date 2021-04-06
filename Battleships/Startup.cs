@@ -38,7 +38,27 @@ namespace Battleships
             services.AddSingleton<GameEngine>();
             services.AddSingleton<RandomGenerator>();
 
-            services.AddSwaggerDocument();
+            services.AddSwaggerDocument(config =>
+            {
+                config.PostProcess = document =>
+                {
+                    document.Info.Version = "v1";
+                    document.Info.Title = "Battleship API";
+                    document.Info.Description = "A simple multiplayer Battleship API";
+                    document.Info.TermsOfService = "None";
+                    document.Info.Contact = new NSwag.OpenApiContact
+                    {
+                        Name = "Jacek Serafinski",
+                        Email = string.Empty,
+                        Url = string.Empty
+                    };
+                    document.Info.License = new NSwag.OpenApiLicense
+                    {
+                        Name = "Use under LICX",
+                        Url = "https://example.com/license"
+                    };
+                };
+            });
 
         }
 

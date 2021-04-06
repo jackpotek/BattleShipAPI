@@ -3,7 +3,6 @@ using Battleships.Engine;
 using Battleships.Models.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 
@@ -15,43 +14,29 @@ namespace Battleships.Controllers
     {
 
         private readonly IMemoryCache _cache;
-        private readonly ILogger<BattleShipController> _logger;
         private readonly IOptions<BattleshipConfiguration> _config;
         private readonly GameEngine _engine;
+        private readonly RandomGenerator _randomGenerator;
 
-        public BattleShipController(ILogger<BattleShipController> logger, IMemoryCache memoryCache, IOptions<BattleshipConfiguration> config, GameEngine engine)
+        public BattleShipController(IMemoryCache memoryCache, IOptions<BattleshipConfiguration> config, GameEngine engine, RandomGenerator randomGenerator)
         {
             _cache = memoryCache;
-            _logger = logger;
             _config = config;
             _engine = engine;
+            _randomGenerator = randomGenerator;
         }
-
-
-        [Route("/error")]
-        public IActionResult Error() => Problem();
 
         [HttpGet]
         [Route("NewGame")]
         public ActionResult<GameStateResponse> GetNewGame()
         {
-            var rng = new Random();
-            int random = rng.Next(1, 10000);
+            int random = _randomGenerator.GetRandomNumber(10000);
             while (_cache.Get(random) != null)
             {
-                random = rng.Next(1, 10000);
+                random = _randomGenerator.GetRandomNumber(10000);
             }
-
-            GameStateResponse game;
-
-            using (var entry = _cache.CreateEntry(random))
-            {
-                game = new GameStateResponse(random);
-                entry.Value = game;
-                entry.AbsoluteExpiration = DateTime.UtcNow.AddDays(10);
-            }
-
-            return game;
+            var entry = _cache.Set(random, new GameStateResponse(random), new MemoryCacheEntryOptions().SetSize(1).SetSlidingExpiration(TimeSpan.FromDays(10)));
+            return entry;
         }
 
         [HttpPost]

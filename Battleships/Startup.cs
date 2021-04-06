@@ -36,6 +36,7 @@ namespace Battleships
             });
             services.Configure<BattleshipConfiguration>(Configuration.GetSection("BattleshipConfiguration"));
             services.AddSingleton<GameEngine>();
+            services.AddSingleton<RandomGenerator>();
 
             services.AddSwaggerDocument();
 

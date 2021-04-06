@@ -157,16 +157,16 @@ namespace Battleships.Engine
 
             if (shipBeeingShot != null)
             {
-                gameState.Message = "Shot succeeded";
+                gameState.Message = "Shot succeeded, Ship not yet destroyed";
 
                 if (shipBeeingShot.checkDestroyed())
-                    gameState.Message = "Shot succeeded, ship destroyed";
+                    gameState.Message = "Shot succeeded, Ship destroyed";
 
-                if (ships.Where(i => i.checkDestroyed()).Count() == 10)
+                if (ships.Where(i => i.checkDestroyed()).Count() == ships.Count)
                 {
                     gameState.WinnerPlayer = gameState.NextPlayer;
                     gameState.GameStatus = GameStatuses.FINISHED;
-                    gameState.Message = "Game finished, player " + gameState.NextPlayer + " has won the game";
+                    gameState.Message = $"Game finished, player {gameState.NextPlayer} has won the game";
                     gameState.NextPlayer = 0;
                     return;
                 }
